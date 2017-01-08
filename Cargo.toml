@@ -1,0 +1,11 @@
+[package]
+name = "pagersduty"
+version = "0.1.0"
+authors = ["Gary M. Josack <gary@byoteki.com>"]
+repository = "https://github.com/ZeroCostGoods/pagersduty"
+documentation = "https://docs.rs/pagersduty"
+license = "MIT OR Apache-2.0"
+description = "Rust Client Library for the PagerDuty v2 API"
+
+[dependencies]
+hyper = "0.9"
