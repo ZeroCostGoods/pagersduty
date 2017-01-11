@@ -1,5 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
+use serde::Error;
 
 use super::reference::Reference;
 
@@ -89,13 +90,18 @@ impl Deserialize for Team {
                 })
             },
             "team" => {
+                let name = match union.name {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("name")),
+                };
+
                 Ok(Team::Team {
                     reference: reference,
-                    name: union.name.expect("name"),
+                    name: name,
                     description: union.description,
                 })
             },
-            _ => panic!("fuuuuuuu"),
+            _ => Err(D::Error::invalid_value("type received was unexpected.")),
         }
     }
 }
