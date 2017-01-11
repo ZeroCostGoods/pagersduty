@@ -1,5 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
+use serde::Error;
 
 use super::reference::Reference;
 
@@ -258,45 +259,141 @@ impl Deserialize for ContactMethod {
                 })
             },
             "email_contact_method" => {
+
+                let address = match union.address {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("address")),
+                };
+
+                let label = match union.label {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("label")),
+                };
+
+                let send_short_email = match union.send_short_email {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("send_short_email")),
+                };
+
+                let send_html_email = match union.send_html_email {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("send_html_email")),
+                };
+
                 Ok(ContactMethod::EmailContactMethod {
                     reference: reference,
-                    address: union.address.expect("address"),
-                    label: union.label.expect("label"),
-                    send_short_email: union.send_short_email.expect("send_short_email"),
-                    send_html_email: union.send_html_email.expect("send_html_email"),
+                    address: address,
+                    label: label,
+                    send_short_email: send_short_email,
+                    send_html_email: send_html_email,
                 })
             },
             "phone_contact_method" => {
+                let address = match union.address {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("address")),
+                };
+
+                let label = match union.label {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("label")),
+                };
+
+                let blacklisted = match union.blacklisted {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("blacklisted")),
+                };
+
+                let country_code = match union.country_code {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("country_code")),
+                };
+
                 Ok(ContactMethod::PhoneContactMethod {
                     reference: reference,
-                    address: union.address.expect("address"),
-                    label: union.label.expect("label"),
-                    blacklisted: union.blacklisted.expect("blacklisted"),
-                    country_code: union.country_code.expect("country_code"),
+                    address: address,
+                    label: label,
+                    blacklisted: blacklisted,
+                    country_code: country_code,
                 })
             },
             "sms_contact_method" => {
+                let address = match union.address {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("address")),
+                };
+
+                let label = match union.label {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("label")),
+                };
+
+                let blacklisted = match union.blacklisted {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("blacklisted")),
+                };
+
+                let country_code = match union.country_code {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("country_code")),
+                };
+
+                let enabled = match union.enabled {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("enabled")),
+                };
+
                 Ok(ContactMethod::SmsContactMethod {
                     reference: reference,
-                    address: union.address.expect("address"),
-                    label: union.label.expect("label"),
-                    blacklisted: union.blacklisted.expect("blacklisted"),
-                    country_code: union.country_code.expect("country_code"),
-                    enabled: union.enabled.expect("enabled"),
+                    address: address,
+                    label: label,
+                    blacklisted: blacklisted,
+                    country_code: country_code,
+                    enabled: enabled,
                 })
             },
             "push_notification_contact_method" => {
+                let address = match union.address {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("address")),
+                };
+
+                let label = match union.label {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("label")),
+                };
+
+                let blacklisted = match union.blacklisted {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("blacklisted")),
+                };
+
+                let created_at = match union.created_at {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("created_at")),
+                };
+
+                let device_type = match union.device_type {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("device_type")),
+                };
+
+                let sounds = match union.sounds {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("sounds")),
+                };
+
                 Ok(ContactMethod::PushNotificationContactMethod {
                     reference: reference,
-                    address: union.address.expect("address"),
-                    label: union.label.expect("label"),
-                    blacklisted: union.blacklisted.expect("blacklisted"),
-                    created_at: union.created_at.expect("created_at"),
-                    device_type: union.device_type.expect("device_type"),
-                    sounds: union.sounds.expect("sounds"),
+                    address: address,
+                    label: label,
+                    blacklisted: blacklisted,
+                    created_at: created_at,
+                    device_type: device_type,
+                    sounds: sounds,
                 })
             },
-            _ => panic!("fuuuuuuu"),
+            _ => Err(D::Error::invalid_value("type received was unexpected.")),
         }
     }
 }

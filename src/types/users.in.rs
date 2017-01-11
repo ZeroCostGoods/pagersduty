@@ -1,5 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
+use serde::Error;
 
 use super::reference::Reference;
 use super::contact_methods::ContactMethods;
@@ -172,23 +173,73 @@ impl Deserialize for User {
                 })
             },
             "user" => {
+                let avatar_url = match union.avatar_url {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("avatar_url")),
+                };
+
+                let color = match union.color {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("color")),
+                };
+
+                let contact_methods = match union.contact_methods {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("contact_methods")),
+                };
+
+                let email = match union.email {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("email")),
+                };
+
+                let invitation_sent = match union.invitation_sent {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("invitation_sent")),
+                };
+
+                let name = match union.name {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("name")),
+                };
+
+                let notification_rules = match union.notification_rules {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("notification_rules")),
+                };
+
+                let role = match union.role {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("role")),
+                };
+
+                let teams = match union.teams {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("teams")),
+                };
+
+                let time_zone = match union.time_zone {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("time_zone")),
+                };
+
                 Ok(User::User {
                     reference: reference,
-                    avatar_url: union.avatar_url.expect("avatar_url"),
-                    color: union.color.expect("color"),
-                    contact_methods: union.contact_methods.expect("contact_methods"),
+                    avatar_url: avatar_url,
+                    color: color,
+                    contact_methods: contact_methods,
                     description: union.description,
-                    email: union.email.expect("email"),
-                    invitation_sent: union.invitation_sent.expect("invitation_sent"),
+                    email: email,
+                    invitation_sent: invitation_sent,
                     job_title: union.job_title,
-                    name: union.name.expect("name"),
-                    notification_rules: union.notification_rules.expect("notification_rules"),
-                    role: union.role.expect("role"),
-                    teams: union.teams.expect("teams"),
-                    time_zone: union.time_zone.expect("time_zone"),
+                    name: name,
+                    notification_rules: notification_rules,
+                    role: role,
+                    teams: teams,
+                    time_zone: time_zone,
                 })
             },
-            _ => panic!("fuuuuuuu"),
+            _ => Err(D::Error::invalid_value("type received was unexpected.")),
         }
     }
 }

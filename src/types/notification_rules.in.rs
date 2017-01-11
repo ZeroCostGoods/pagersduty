@@ -1,5 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
+use serde::Error;
 
 use super::reference::Reference;
 use super::contact_methods::ContactMethod;
@@ -100,14 +101,30 @@ impl Deserialize for NotificationRule {
                 })
             },
             "assignment_notification_rule" => {
+
+                let start_delay_in_minutes = match union.start_delay_in_minutes {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("start_delay_in_minutes")),
+                };
+
+                let contact_method = match union.contact_method {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("contact_method")),
+                };
+
+                let urgency = match union.urgency {
+                    Some(val) => val,
+                    None => return Err(D::Error::missing_field("urgency")),
+                };
+
                 Ok(NotificationRule::NotificationRule {
                     reference: reference,
-                    start_delay_in_minutes: union.start_delay_in_minutes.expect("start_delay_in_minutes"),
-                    contact_method: union.contact_method.expect("contact_method"),
-                    urgency: union.urgency.expect("urgency"),
+                    start_delay_in_minutes: start_delay_in_minutes,
+                    contact_method: contact_method,
+                    urgency: urgency,
                 })
             },
-            _ => panic!("fuuuuuuu"),
+            _ => Err(D::Error::invalid_value("type received was unexpected.")),
         }
     }
 }
