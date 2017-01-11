@@ -1,0 +1,18 @@
+[
+  {
+    "id": "PRJ4D5C",
+    "type": "team_reference",
+    "summary": "ops",
+    "self": "https://api.pagerduty.com/teams/PRJ4D5C",
+    "html_url": "https://webdemo.pagerduty.com/teams/PRJ4D5C"
+  },
+  {
+    "id": "P7W0ZIU",
+    "name": "Monitoring Tools Team",
+    "description": null,
+    "type": "team",
+    "summary": "Monitoring Tools Team",
+    "self": "https://api.pagerduty.com/teams/P7W0ZIU",
+    "html_url": "https://webdemo.pagerduty.com/teams/P7W0ZIU"
+  }
+]

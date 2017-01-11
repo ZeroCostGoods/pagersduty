@@ -1,0 +1,61 @@
+[
+  {
+    "id": "PPPIOPG",
+    "type": "email_contact_method_reference",
+    "summary": "Default",
+    "self": "https://api.pagerduty.com/users/PZ7JFQ7/contact_methods/PPPIOPG",
+    "html_url": null
+  },
+  {
+    "id": "P33R0ZA",
+    "type": "email_contact_method",
+    "summary": "Work",
+    "self": "https://api.pagerduty.com/users/PZ7JFQ7/contact_methods/P33R0ZA",
+    "html_url": null,
+    "label": "Work",
+    "address": "alejandro@example.com",
+    "send_short_email": false,
+    "send_html_email": false
+  },
+  {
+    "id": "PEC83HY",
+    "type": "sms_contact_method",
+    "summary": "Mobile",
+    "self": "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PEC83HY",
+    "html_url": null,
+    "label": "Mobile",
+    "address": "4155809923",
+    "country_code": 1,
+    "blacklisted": false,
+    "enabled": true
+  },
+  {
+    "id": "PBUSVMD",
+    "type": "phone_contact_method",
+    "summary": "Mobile",
+    "self": "https://api.pagerduty.com/users/P1RQ0Z6/contact_methods/PBUSVMD",
+    "html_url": null,
+    "label": "Mobile",
+    "address": "7076949626",
+    "country_code": 1,
+    "blacklisted": false
+  },
+  {
+    "id": "P4G3JKD",
+    "type": "push_notification_contact_method",
+    "summary": "Alex's iPhone",
+    "self": "https://api.pagerduty.com/users/P1RQ0Z6/contact_methods/P4G3JKD",
+    "html_url": null,
+    "label": "Alex's iPhone",
+    "address": "fcbaba06abe7533794b0dd7c3f4427b574772c01445e06bb5a006c33f14d95d0",
+    "device_type": "ios",
+    "sounds": [
+      {
+        "type": "alert_high_urgency",
+        "file": "default"
+      }
+    ],
+    "blacklisted": false,
+    "created_at": "2016-07-11T11:36:41-07:00"
+  }
+]

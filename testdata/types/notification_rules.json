@@ -1,0 +1,77 @@
+[
+  {
+    "id": "PM41X3T",
+    "type": "assignment_notification_rule_reference",
+    "summary": "0 minutes: channel P6YMJEE",
+    "self": "https://api.pagerduty.com/users/P5T36BU/notification_rules/PM41X3T",
+    "html_url": null
+  },
+  {
+    "id": "PNTRY7M",
+    "type": "assignment_notification_rule_reference",
+    "summary": "0 minutes: channel P6YMJEE",
+    "self": "https://api.pagerduty.com/users/P5T36BU/notification_rules/PNTRY7M",
+    "html_url": null
+  },
+  {
+    "id": "PW0WSB8",
+    "type": "assignment_notification_rule",
+    "summary": "0 minutes: channel PX11CYC",
+    "self": "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PW0WSB8",
+    "html_url": null,
+    "start_delay_in_minutes": 0,
+    "contact_method": {
+      "id": "PX11CYC",
+      "type": "email_contact_method",
+      "summary": "Default",
+      "self": "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC",
+      "html_url": null,
+      "label": "Default",
+      "address": "acunningham@pagerduty.com",
+      "send_short_email": false,
+      "send_html_email": false
+    },
+    "urgency": "high"
+  },
+  {
+    "id": "PGITUFO",
+    "type": "assignment_notification_rule",
+    "summary": "0 minutes: channel PX11CYC",
+    "self": "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PGITUFO",
+    "html_url": null,
+    "start_delay_in_minutes": 0,
+    "contact_method": {
+      "id": "PX11CYC",
+      "type": "email_contact_method",
+      "summary": "Default",
+      "self": "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC",
+      "html_url": null,
+      "label": "Default",
+      "address": "acunningham@pagerduty.com",
+      "send_short_email": false,
+      "send_html_email": false
+    },
+    "urgency": "low"
+  },
+  {
+    "id": "PEY06R9",
+    "type": "assignment_notification_rule",
+    "summary": "0 minutes: channel PEC83HY",
+    "self": "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PEY06R9",
+    "html_url": null,
+    "start_delay_in_minutes": 0,
+    "contact_method": {
+      "id": "PEC83HY",
+      "type": "sms_contact_method",
+      "summary": "Mobile",
+      "self": "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PEC83HY",
+      "html_url": null,
+      "label": "Mobile",
+      "address": "4155809923",
+      "country_code": 1,
+      "blacklisted": false,
+      "enabled": true
+    },
+    "urgency": "high"
+  }
+]

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "PRMXSSO",
+    "type": "user_reference",
+    "summary": "Benedict Cumberbatch",
+    "self": "https://api.pagerduty.com/users/PRMXSSO",
+    "html_url": "https://webdemo.pagerduty.com/users/PRMXSSO"
+  },
+  {
+    "name": "abhijit@pagerduty.com",
+    "email": "abhijit@pagerduty.com",
+    "time_zone": "America/Los_Angeles",
+    "color": "olivedrab",
+    "avatar_url": "https://secure.gravatar.com/avatar/267299c8432bf9ab044472009c89a674.png?d=mm&r=PG",
+    "role": "user",
+    "description": null,
+    "invitation_sent": false,
+    "contact_methods": [
+      {
+        "id": "P6YMJEE",
+        "type": "email_contact_method_reference",
+        "summary": "Default",
+        "self": "https://api.pagerduty.com/users/P5T36BU/contact_methods/P6YMJEE",
+        "html_url": null
+      }
+    ],
+    "notification_rules": [
+      {
+        "id": "PM41X3T",
+        "type": "assignment_notification_rule_reference",
+        "summary": "0 minutes: channel P6YMJEE",
+        "self": "https://api.pagerduty.com/users/P5T36BU/notification_rules/PM41X3T",
+        "html_url": null
+      },
+      {
+        "id": "PNTRY7M",
+        "type": "assignment_notification_rule_reference",
+        "summary": "0 minutes: channel P6YMJEE",
+        "self": "https://api.pagerduty.com/users/P5T36BU/notification_rules/PNTRY7M",
+        "html_url": null
+      }
+    ],
+    "job_title": null,
+    "teams": [],
+    "id": "P5T36BU",
+    "type": "user",
+    "summary": "abhijit@pagerduty.com",
+    "self": "https://api.pagerduty.com/users/P5T36BU",
+    "html_url": "https://webdemo.pagerduty.com/users/P5T36BU"
+  }
+]

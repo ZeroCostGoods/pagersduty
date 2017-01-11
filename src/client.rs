@@ -1,6 +1,6 @@
 use hyper;
-use hyper::header::{Headers, Accept, Authorization, qitem};
 use hyper::client::response::{Response};
+use hyper::header::{Headers, Accept, Authorization, qitem};
 use hyper::mime::{Mime};
 
 static PD_API_URL: &'static str = "https://api.pagerduty.com";
@@ -30,7 +30,7 @@ impl Client {
             format!("Token token={}", self.auth_token)
         ));
 
-        return headers
+        headers
     }
 
     fn get_accept_header(&self) -> Accept {
@@ -75,4 +75,3 @@ mod tests {
         );
     }
 }
-

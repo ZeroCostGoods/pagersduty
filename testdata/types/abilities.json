@@ -1,0 +1,18 @@
+[
+  "sso",
+  "advanced_reports",
+  "teams",
+  "read_only_users",
+  "team_responders",
+  "service_support_hours",
+  "urgencies",
+  "manage_schedules",
+  "manage_api_keys",
+  "coordinated_responding",
+  "using_alerts_on_any_service",
+  "event_rules",
+  "coordinated_responding_preview",
+  "preview_incident_alert_split",
+  "features_in_use_preventing_downgrade_to",
+  "feature_to_plan_map"
+]
