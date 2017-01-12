@@ -102,20 +102,12 @@ impl Deserialize for NotificationRule {
             },
             "assignment_notification_rule" => {
 
-                let start_delay_in_minutes = match union.start_delay_in_minutes {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("start_delay_in_minutes")),
-                };
-
-                let contact_method = match union.contact_method {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("contact_method")),
-                };
-
-                let urgency = match union.urgency {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("urgency")),
-                };
+                let start_delay_in_minutes = union.start_delay_in_minutes.ok_or(
+                    D::Error::missing_field("start_delay_in_minutes"))?;
+                let contact_method = union.contact_method.ok_or(
+                    D::Error::missing_field("contact_method"))?;
+                let urgency = union.urgency.ok_or(
+                    D::Error::missing_field("urgency"))?;
 
                 Ok(NotificationRule::NotificationRule {
                     reference: reference,

@@ -90,10 +90,7 @@ impl Deserialize for Team {
                 })
             },
             "team" => {
-                let name = match union.name {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("name")),
-                };
+                let name = union.name.ok_or(D::Error::missing_field("name"))?;
 
                 Ok(Team::Team {
                     reference: reference,

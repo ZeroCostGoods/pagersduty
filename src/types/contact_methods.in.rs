@@ -259,26 +259,14 @@ impl Deserialize for ContactMethod {
                 })
             },
             "email_contact_method" => {
-
-                let address = match union.address {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("address")),
-                };
-
-                let label = match union.label {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("label")),
-                };
-
-                let send_short_email = match union.send_short_email {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("send_short_email")),
-                };
-
-                let send_html_email = match union.send_html_email {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("send_html_email")),
-                };
+                let address = union.address.ok_or(
+                    D::Error::missing_field("address"))?;
+                let label = union.label.ok_or(
+                    D::Error::missing_field("label"))?;
+                let send_short_email = union.send_short_email.ok_or(
+                    D::Error::missing_field("send_short_email"))?;
+                let send_html_email = union.send_html_email.ok_or(
+                    D::Error::missing_field("send_html_email"))?;
 
                 Ok(ContactMethod::EmailContactMethod {
                     reference: reference,
@@ -289,25 +277,14 @@ impl Deserialize for ContactMethod {
                 })
             },
             "phone_contact_method" => {
-                let address = match union.address {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("address")),
-                };
-
-                let label = match union.label {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("label")),
-                };
-
-                let blacklisted = match union.blacklisted {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("blacklisted")),
-                };
-
-                let country_code = match union.country_code {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("country_code")),
-                };
+                let address = union.address.ok_or(
+                    D::Error::missing_field("address"))?;
+                let label = union.label.ok_or(
+                    D::Error::missing_field("label"))?;
+                let blacklisted = union.blacklisted.ok_or(
+                    D::Error::missing_field("blacklisted"))?;
+                let country_code = union.country_code.ok_or(
+                    D::Error::missing_field("country_code"))?;
 
                 Ok(ContactMethod::PhoneContactMethod {
                     reference: reference,
@@ -318,30 +295,16 @@ impl Deserialize for ContactMethod {
                 })
             },
             "sms_contact_method" => {
-                let address = match union.address {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("address")),
-                };
-
-                let label = match union.label {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("label")),
-                };
-
-                let blacklisted = match union.blacklisted {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("blacklisted")),
-                };
-
-                let country_code = match union.country_code {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("country_code")),
-                };
-
-                let enabled = match union.enabled {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("enabled")),
-                };
+                let address = union.address.ok_or(
+                    D::Error::missing_field("address"))?;
+                let label = union.label.ok_or(
+                    D::Error::missing_field("label"))?;
+                let blacklisted = union.blacklisted.ok_or(
+                    D::Error::missing_field("blacklisted"))?;
+                let country_code = union.country_code.ok_or(
+                    D::Error::missing_field("country_code"))?;
+                let enabled = union.enabled.ok_or(
+                    D::Error::missing_field("enabled"))?;
 
                 Ok(ContactMethod::SmsContactMethod {
                     reference: reference,
@@ -353,35 +316,18 @@ impl Deserialize for ContactMethod {
                 })
             },
             "push_notification_contact_method" => {
-                let address = match union.address {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("address")),
-                };
-
-                let label = match union.label {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("label")),
-                };
-
-                let blacklisted = match union.blacklisted {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("blacklisted")),
-                };
-
-                let created_at = match union.created_at {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("created_at")),
-                };
-
-                let device_type = match union.device_type {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("device_type")),
-                };
-
-                let sounds = match union.sounds {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("sounds")),
-                };
+                let address = union.address.ok_or(
+                    D::Error::missing_field("address"))?;
+                let label = union.label.ok_or(
+                    D::Error::missing_field("label"))?;
+                let blacklisted = union.blacklisted.ok_or(
+                    D::Error::missing_field("blacklisted"))?;
+                let created_at = union.created_at.ok_or(
+                    D::Error::missing_field("created_at"))?;
+                let device_type = union.device_type.ok_or(
+                    D::Error::missing_field("device_type"))?;
+                let sounds = union.sounds.ok_or(
+                    D::Error::missing_field("sounds"))?;
 
                 Ok(ContactMethod::PushNotificationContactMethod {
                     reference: reference,
