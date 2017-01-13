@@ -2,7 +2,7 @@ use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
 use serde::Error;
 
-use super::reference::Reference;
+use types::reference::Reference;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -114,7 +114,8 @@ mod tests {
     use serde_json;
     use std::fs::File;
     use std::io::Read;
-    use super::super::reference::Reference;
+
+    use types::reference::Reference;
 
     #[test]
     fn test_serde() {

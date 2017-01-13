@@ -2,10 +2,10 @@ use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
 use serde::Error;
 
-use super::reference::Reference;
-use super::contact_methods::ContactMethods;
-use super::notification_rules::NotificationRules;
-use super::teams::Teams;
+use types::reference::Reference;
+use types::contact_methods::ContactMethods;
+use types::notification_rules::NotificationRules;
+use types::teams::Teams;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -226,9 +226,10 @@ mod tests {
     use serde_json;
     use std::fs::File;
     use std::io::Read;
-    use super::super::reference::Reference;
-    use super::super::contact_methods::ContactMethod;
-    use super::super::notification_rules::NotificationRule;
+
+    use ::types::reference::Reference;
+    use ::types::contact_methods::ContactMethod;
+    use ::types::notification_rules::NotificationRule;
 
     #[test]
     fn test_serde() {
