@@ -3,6 +3,7 @@ use serde_json::value;
 
 static EVENTS_URL: &'static str = "https://events.pagerduty.com/generic/2010-04-15/create_event.json";
 
+#[derive(Debug, PartialEq)]
 pub enum Context {
 
     /// The link type is used to attach hyperlinks to an incident.
@@ -70,7 +71,7 @@ impl Serialize for Context {
 }
 
 
-
+#[derive(Serialize, Debug, PartialEq)]
 pub struct TriggerEvent {
 
     /// The GUID of one of your "Generic API" services. This is the
@@ -78,24 +79,29 @@ pub struct TriggerEvent {
     service_key: String,
 
     /// The type of event. Can be trigger, acknowledge or resolve.
-    event_type: &'static str,
+    event_type: String,
 
     /// Text that will appear in the incident's log associated with this event. Required for trigger events.
     description: String,
 
     /// Identifies the incident to trigger, acknowledge, or resolve. Required unless the event_type is trigger.
+    #[serde(skip_serializing_if = "Option::is_none")]
     incident_key: Option<String>,
 
     /// An arbitrary JSON object containing any data you'd like included in the incident log.
+    #[serde(skip_serializing_if = "Option::is_none")]
     details: Option<value::Value>,
 
     /// The name of the monitoring client that is triggering this event.
+    #[serde(skip_serializing_if = "Option::is_none")]
     client: Option<String>,
 
     /// The URL of the monitoring client that is triggering this event.
+    #[serde(skip_serializing_if = "Option::is_none")]
     client_url: Option<String>,
 
     /// Contexts to be included with the incident trigger such as links to graphs or images.
+    #[serde(skip_serializing_if = "Option::is_none")]
     contexts: Option<Vec<Context>>,
 }
 
@@ -103,7 +109,7 @@ impl TriggerEvent {
     pub fn new(service_key: String, description: String) -> TriggerEvent {
         TriggerEvent {
             service_key: service_key,
-            event_type: "trigger",
+            event_type: "trigger".into(),
             description: description,
             incident_key: None,
             details: None,
@@ -139,6 +145,7 @@ impl TriggerEvent {
     }
 }
 
+#[derive(Serialize, Debug, PartialEq)]
 pub enum HandleEventType {
 
     /// Acknowledge events cause the referenced incident to enter the acknowledged state.
@@ -161,6 +168,7 @@ pub enum HandleEventType {
     Resolve,
 }
 
+#[derive(Serialize, Debug, PartialEq)]
 pub struct HandleEvent {
 
     /// The GUID of one of your "Generic API" services. This is the
@@ -168,7 +176,7 @@ pub struct HandleEvent {
     service_key: String,
 
     /// The type of event. Can be trigger, acknowledge or resolve.
-    event_type: &'static str,
+    event_type: String,
 
     /// Identifies the incident to acknowledge or resolve.
     incident_key: String,
@@ -177,8 +185,8 @@ pub struct HandleEvent {
 impl HandleEvent {
     pub fn new(service_key: String, event_type: HandleEventType, incident_key: String) -> HandleEvent {
         let event_type = match event_type {
-            HandleEventType::Acknowledge => "acknowledge",
-            HandleEventType::Resolve => "resolve",
+            HandleEventType::Acknowledge => "acknowledge".into(),
+            HandleEventType::Resolve => "resolve".into(),
         };
 
         HandleEvent {
@@ -197,5 +205,10 @@ mod tests {
 
     #[test]
     fn test_serialization(){
+        let event = TriggerEvent::new("Some key".into(), "some description".into());
+        let ser = serde_json::to_string_pretty(&event).unwrap();
+
+        print!("{:#?}", ser);
+
     }
 }
