@@ -1,0 +1,23 @@
+{
+    "client": "pagersduty-test",
+    "client_url": "http://localhost",
+    "contexts": [
+        {
+            "href": "http://zombo.com/",
+            "text": "You can do anything at Zombo.com",
+            "type": "link"
+        },
+        {
+            "src": "http://localhost/nope.gif",
+            "type": "image"
+        }
+    ],
+    "description": "some description",
+    "details": {
+        "key1": "value1",
+        "key2": 3.14
+    },
+    "event_type": "trigger",
+    "incident_key": "AG23DR1",
+    "service_key": "Some key"
+}

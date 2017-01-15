@@ -119,27 +119,27 @@ impl TriggerEvent {
         }
     }
 
-    pub fn incident_key(&mut self, incident_key: String) -> &mut TriggerEvent {
+    pub fn incident_key(mut self, incident_key: String) -> TriggerEvent {
         self.incident_key = Some(incident_key);
         self
     }
 
-    pub fn details(&mut self, details: value::Value) -> &mut TriggerEvent {
+    pub fn details(mut self, details: value::Value) -> TriggerEvent {
         self.details = Some(details);
         self
     }
 
-    pub fn client(&mut self, client: String) -> &mut TriggerEvent {
+    pub fn client(mut self, client: String) -> TriggerEvent {
         self.client = Some(client);
         self
     }
 
-    pub fn client_url(&mut self, client_url: String) -> &mut TriggerEvent {
+    pub fn client_url(mut self, client_url: String) -> TriggerEvent {
         self.client_url = Some(client_url);
         self
     }
 
-    pub fn contexts(&mut self, contexts: Vec<Context>) -> &mut TriggerEvent {
+    pub fn contexts(mut self, contexts: Vec<Context>) -> TriggerEvent {
         self.contexts = Some(contexts);
         self
     }
@@ -202,13 +202,97 @@ mod tests {
 
     use super::*;
     use serde_json;
+    use std::fs::File;
+    use std::io::Read;
+
 
     #[test]
-    fn test_serialization(){
+    fn test_trigger_event_serialization_1(){
         let event = TriggerEvent::new("Some key".into(), "some description".into());
-        let ser = serde_json::to_string_pretty(&event).unwrap();
+        let json: serde_json::Value = serde_json::from_str(
+            serde_json::to_string(&event).unwrap().as_ref()
+        ).unwrap();
 
-        print!("{:#?}", ser);
+        let mut file = File::open("testdata/events/trigger_event_serialization_1.json").unwrap();
+        let mut data = String::new();
+        file.read_to_string(&mut data).unwrap();
+        let expected: serde_json::Value = serde_json::from_str(&data).unwrap();
 
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn test_trigger_event_serialization_2(){
+
+        let mut details = serde_json::Map::new();
+        details.insert("key1".into(), serde_json::Value::String("value1".into()));
+        details.insert("key2".into(), serde_json::Value::F64(3.14));
+        let details = serde_json::Value::Object(details);
+
+        let contexts = vec![
+            Context::Link {
+                href: "http://zombo.com/".into(),
+                text: Some("You can do anything at Zombo.com".into()),
+            },
+            Context::Image {
+                src: "http://localhost/nope.gif".into(),
+                href: None,
+                alt: None,
+            },
+        ];
+
+        let event = TriggerEvent::new("Some key".into(), "some description".into())
+            .details(details)
+            .incident_key("AG23DR1".into())
+            .client("pagersduty-test".into())
+            .client_url("http://localhost".into())
+            .contexts(contexts);
+
+
+        let json: serde_json::Value = serde_json::from_str(
+            serde_json::to_string(&event).unwrap().as_ref()
+        ).unwrap();
+
+
+        let mut file = File::open("testdata/events/trigger_event_serialization_2.json").unwrap();
+        let mut data = String::new();
+        file.read_to_string(&mut data).unwrap();
+        let expected: serde_json::Value = serde_json::from_str(&data).unwrap();
+
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn test_handle_event_serialization_1(){
+        let event = HandleEvent::new(
+            "Some key".into(), HandleEventType::Acknowledge, "ASF123S".into()
+        );
+        let json: serde_json::Value = serde_json::from_str(
+            serde_json::to_string(&event).unwrap().as_ref()
+        ).unwrap();
+
+        let mut file = File::open("testdata/events/handle_event_serialization_1.json").unwrap();
+        let mut data = String::new();
+        file.read_to_string(&mut data).unwrap();
+        let expected: serde_json::Value = serde_json::from_str(&data).unwrap();
+
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn test_handle_event_serialization_2(){
+        let event = HandleEvent::new(
+            "Some key".into(), HandleEventType::Resolve, "ASF123S".into()
+        );
+        let json: serde_json::Value = serde_json::from_str(
+            serde_json::to_string(&event).unwrap().as_ref()
+        ).unwrap();
+
+        let mut file = File::open("testdata/events/handle_event_serialization_2.json").unwrap();
+        let mut data = String::new();
+        file.read_to_string(&mut data).unwrap();
+        let expected: serde_json::Value = serde_json::from_str(&data).unwrap();
+
+        assert_eq!(json, expected);
     }
 }
