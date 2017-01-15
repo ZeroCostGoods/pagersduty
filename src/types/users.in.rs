@@ -2,10 +2,10 @@ use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
 use serde::Error;
 
-use super::reference::Reference;
-use super::contact_methods::ContactMethods;
-use super::notification_rules::NotificationRules;
-use super::teams::Teams;
+use types::reference::Reference;
+use types::contact_methods::ContactMethods;
+use types::notification_rules::NotificationRules;
+use types::teams::Teams;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -173,55 +173,26 @@ impl Deserialize for User {
                 })
             },
             "user" => {
-                let avatar_url = match union.avatar_url {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("avatar_url")),
-                };
-
-                let color = match union.color {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("color")),
-                };
-
-                let contact_methods = match union.contact_methods {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("contact_methods")),
-                };
-
-                let email = match union.email {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("email")),
-                };
-
-                let invitation_sent = match union.invitation_sent {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("invitation_sent")),
-                };
-
-                let name = match union.name {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("name")),
-                };
-
-                let notification_rules = match union.notification_rules {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("notification_rules")),
-                };
-
-                let role = match union.role {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("role")),
-                };
-
-                let teams = match union.teams {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("teams")),
-                };
-
-                let time_zone = match union.time_zone {
-                    Some(val) => val,
-                    None => return Err(D::Error::missing_field("time_zone")),
-                };
+                let avatar_url = union.avatar_url.ok_or(
+                    D::Error::missing_field("avatar_url"))?;
+                let color = union.color.ok_or(
+                    D::Error::missing_field("color"))?;
+                let contact_methods = union.contact_methods.ok_or(
+                    D::Error::missing_field("contact_methods"))?;
+                let email = union.email.ok_or(
+                    D::Error::missing_field("email"))?;
+                let invitation_sent = union.invitation_sent.ok_or(
+                    D::Error::missing_field("invitation_sent"))?;
+                let name = union.name.ok_or(
+                    D::Error::missing_field("name"))?;
+                let notification_rules = union.notification_rules.ok_or(
+                    D::Error::missing_field("notification_rules"))?;
+                let role = union.role.ok_or(
+                    D::Error::missing_field("role"))?;
+                let teams = union.teams.ok_or(
+                    D::Error::missing_field("teams"))?;
+                let time_zone = union.time_zone.ok_or(
+                    D::Error::missing_field("time_zone"))?;
 
                 Ok(User::User {
                     reference: reference,
@@ -255,9 +226,10 @@ mod tests {
     use serde_json;
     use std::fs::File;
     use std::io::Read;
-    use super::super::reference::Reference;
-    use super::super::contact_methods::ContactMethod;
-    use super::super::notification_rules::NotificationRule;
+
+    use ::types::reference::Reference;
+    use ::types::contact_methods::ContactMethod;
+    use ::types::notification_rules::NotificationRule;
 
     #[test]
     fn test_serde() {

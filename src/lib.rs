@@ -7,3 +7,6 @@ extern crate serde_json;
 pub mod client;
 pub mod errors;
 pub mod types;
+
+pub mod events { include!(concat!(env!("OUT_DIR"), "/events.rs")); }
+

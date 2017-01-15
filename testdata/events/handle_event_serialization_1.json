@@ -1,0 +1,5 @@
+{
+    "event_type": "acknowledge",
+    "incident_key": "ASF123S",
+    "service_key": "Some key"
+}

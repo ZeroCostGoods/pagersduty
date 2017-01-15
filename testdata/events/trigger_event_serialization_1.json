@@ -1,0 +1,5 @@
+{
+    "description": "some description",
+    "event_type": "trigger",
+    "service_key": "Some key"
+}
