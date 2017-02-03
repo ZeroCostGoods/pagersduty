@@ -1,6 +1,8 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
-use serde::Error;
+
+use serde::de::Error;
+use serde::ser::SerializeMap;
 
 use types::reference::Reference;
 use types::contact_methods::ContactMethods;
@@ -91,7 +93,7 @@ pub enum User {
 
 
 impl Serialize for User {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         let mut state = serializer.serialize_map(None)?;
@@ -100,7 +102,7 @@ impl Serialize for User {
             User::UserReference{
                 ref reference
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
             },
             User::User{
                 ref reference,
@@ -108,52 +110,52 @@ impl Serialize for User {
                 ref email, ref invitation_sent, ref job_title, ref name,
                 ref notification_rules, ref role, ref teams, ref time_zone,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "avatar_url")?;
-                serializer.serialize_map_value(&mut state, avatar_url)?;
+                state.serialize_key("avatar_url")?;
+                state.serialize_value(avatar_url)?;
 
-                serializer.serialize_map_key(&mut state, "color")?;
-                serializer.serialize_map_value(&mut state, color)?;
+                state.serialize_key("color")?;
+                state.serialize_value(color)?;
 
-                serializer.serialize_map_key(&mut state, "contact_methods")?;
-                serializer.serialize_map_value(&mut state, contact_methods)?;
+                state.serialize_key("contact_methods")?;
+                state.serialize_value(contact_methods)?;
 
-                serializer.serialize_map_key(&mut state, "description")?;
-                serializer.serialize_map_value(&mut state, description)?;
+                state.serialize_key("description")?;
+                state.serialize_value(description)?;
 
-                serializer.serialize_map_key(&mut state, "email")?;
-                serializer.serialize_map_value(&mut state, email)?;
+                state.serialize_key("email")?;
+                state.serialize_value(email)?;
 
-                serializer.serialize_map_key(&mut state, "invitation_sent")?;
-                serializer.serialize_map_value(&mut state, invitation_sent)?;
+                state.serialize_key("invitation_sent")?;
+                state.serialize_value(invitation_sent)?;
 
-                serializer.serialize_map_key(&mut state, "job_title")?;
-                serializer.serialize_map_value(&mut state, job_title)?;
+                state.serialize_key("job_title")?;
+                state.serialize_value(job_title)?;
 
-                serializer.serialize_map_key(&mut state, "name")?;
-                serializer.serialize_map_value(&mut state, name)?;
+                state.serialize_key("name")?;
+                state.serialize_value(name)?;
 
-                serializer.serialize_map_key(&mut state, "notification_rules")?;
-                serializer.serialize_map_value(&mut state, notification_rules)?;
+                state.serialize_key("notification_rules")?;
+                state.serialize_value(notification_rules)?;
 
-                serializer.serialize_map_key(&mut state, "role")?;
-                serializer.serialize_map_value(&mut state, role)?;
+                state.serialize_key("role")?;
+                state.serialize_value(role)?;
 
-                serializer.serialize_map_key(&mut state, "teams")?;
-                serializer.serialize_map_value(&mut state, teams)?;
+                state.serialize_key("teams")?;
+                state.serialize_value(teams)?;
 
-                serializer.serialize_map_key(&mut state, "time_zone")?;
-                serializer.serialize_map_value(&mut state, time_zone)?;
+                state.serialize_key("time_zone")?;
+                state.serialize_value(time_zone)?;
             },
         }
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
 impl Deserialize for User {
-    fn deserialize<D>(deserializer: &mut D) -> Result<User, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<User, D::Error>
         where D: Deserializer
     {
         let union = UserUnion::deserialize(deserializer)?;
@@ -210,7 +212,7 @@ impl Deserialize for User {
                     time_zone: time_zone,
                 })
             },
-            _ => Err(D::Error::invalid_value("type received was unexpected.")),
+            _ => Err(D::Error::custom("type received was unexpected.")),
         }
     }
 }

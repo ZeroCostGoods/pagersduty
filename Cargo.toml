@@ -6,13 +6,9 @@ repository = "https://github.com/ZeroCostGoods/pagersduty"
 documentation = "https://docs.rs/pagersduty"
 license = "MIT OR Apache-2.0"
 description = "Rust Client Library for the PagerDuty v2 API"
-build = "build.rs"
-
-[build-dependencies]
-serde_codegen = "0.8"
-glob = "0.2"
 
 [dependencies]
-hyper = "0.9"
-serde = "0.8"
-serde_json = "0.8"
+hyper = "0.10"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"

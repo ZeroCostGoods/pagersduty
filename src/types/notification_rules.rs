@@ -1,6 +1,8 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
-use serde::Error;
+
+use serde::de::Error;
+use serde::ser::SerializeMap;
 
 use types::reference::Reference;
 use types::contact_methods::ContactMethod;
@@ -48,7 +50,7 @@ pub enum NotificationRule {
 
 
 impl Serialize for NotificationRule {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         let mut state = serializer.serialize_map(None)?;
@@ -57,31 +59,31 @@ impl Serialize for NotificationRule {
             NotificationRule::NotificationRuleReference{
                 ref reference
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
             },
             NotificationRule::NotificationRule{
                 ref reference, ref start_delay_in_minutes,
                 ref contact_method, ref urgency,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "start_delay_in_minutes")?;
-                serializer.serialize_map_value(&mut state, start_delay_in_minutes)?;
+                state.serialize_key("start_delay_in_minutes")?;
+                state.serialize_value(start_delay_in_minutes)?;
 
-                serializer.serialize_map_key(&mut state, "contact_method")?;
-                serializer.serialize_map_value(&mut state, contact_method)?;
+                state.serialize_key("contact_method")?;
+                state.serialize_value(contact_method)?;
 
-                serializer.serialize_map_key(&mut state, "urgency")?;
-                serializer.serialize_map_value(&mut state, urgency)?;
+                state.serialize_key("urgency")?;
+                state.serialize_value(urgency)?;
             },
         }
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
 impl Deserialize for NotificationRule {
-    fn deserialize<D>(deserializer: &mut D) -> Result<NotificationRule, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<NotificationRule, D::Error>
         where D: Deserializer
     {
         let union = NotificationRuleUnion::deserialize(deserializer)?;
@@ -116,7 +118,7 @@ impl Deserialize for NotificationRule {
                     urgency: urgency,
                 })
             },
-            _ => Err(D::Error::invalid_value("type received was unexpected.")),
+            _ => Err(D::Error::custom("type received was unexpected.")),
         }
     }
 }

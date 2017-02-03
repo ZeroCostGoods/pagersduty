@@ -1,6 +1,8 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
-use serde::Error;
+
+use serde::de::Error;
+use serde::ser::SerializeMap;
 
 use types::reference::Reference;
 
@@ -133,7 +135,7 @@ pub enum ContactMethod {
 
 
 impl Serialize for ContactMethod {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         let mut state = serializer.serialize_map(None)?;
@@ -142,99 +144,99 @@ impl Serialize for ContactMethod {
             ContactMethod::ContactMethodReference{
                 ref reference
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
             },
             ContactMethod::EmailContactMethod{
                 ref reference, ref address, ref label,
                 ref send_short_email, ref send_html_email,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "address")?;
-                serializer.serialize_map_value(&mut state, address)?;
+                state.serialize_key("address")?;
+                state.serialize_value(address)?;
 
-                serializer.serialize_map_key(&mut state, "label")?;
-                serializer.serialize_map_value(&mut state, label)?;
+                state.serialize_key("label")?;
+                state.serialize_value(label)?;
 
-                serializer.serialize_map_key(&mut state, "send_short_email")?;
-                serializer.serialize_map_value(&mut state, send_short_email)?;
+                state.serialize_key("send_short_email")?;
+                state.serialize_value(send_short_email)?;
 
-                serializer.serialize_map_key(&mut state, "send_html_email")?;
-                serializer.serialize_map_value(&mut state, send_html_email)?;
+                state.serialize_key("send_html_email")?;
+                state.serialize_value(send_html_email)?;
             },
             ContactMethod::PhoneContactMethod{
                 ref reference, ref address, ref label,
                 ref blacklisted, ref country_code,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "address")?;
-                serializer.serialize_map_value(&mut state, address)?;
+                state.serialize_key("address")?;
+                state.serialize_value(address)?;
 
-                serializer.serialize_map_key(&mut state, "label")?;
-                serializer.serialize_map_value(&mut state, label)?;
+                state.serialize_key("label")?;
+                state.serialize_value(label)?;
 
-                serializer.serialize_map_key(&mut state, "country_code")?;
-                serializer.serialize_map_value(&mut state, country_code)?;
+                state.serialize_key("country_code")?;
+                state.serialize_value(country_code)?;
 
-                serializer.serialize_map_key(&mut state, "blacklisted")?;
-                serializer.serialize_map_value(&mut state, blacklisted)?;
+                state.serialize_key("blacklisted")?;
+                state.serialize_value(blacklisted)?;
 
             },
             ContactMethod::SmsContactMethod{
                 ref reference, ref address, ref label,
                 ref blacklisted, ref country_code, ref enabled,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "address")?;
-                serializer.serialize_map_value(&mut state, address)?;
+                state.serialize_key("address")?;
+                state.serialize_value(address)?;
 
-                serializer.serialize_map_key(&mut state, "label")?;
-                serializer.serialize_map_value(&mut state, label)?;
+                state.serialize_key("label")?;
+                state.serialize_value(label)?;
 
-                serializer.serialize_map_key(&mut state, "country_code")?;
-                serializer.serialize_map_value(&mut state, country_code)?;
+                state.serialize_key("country_code")?;
+                state.serialize_value(country_code)?;
 
-                serializer.serialize_map_key(&mut state, "blacklisted")?;
-                serializer.serialize_map_value(&mut state, blacklisted)?;
+                state.serialize_key("blacklisted")?;
+                state.serialize_value(blacklisted)?;
 
-                serializer.serialize_map_key(&mut state, "enabled")?;
-                serializer.serialize_map_value(&mut state, enabled)?;
+                state.serialize_key("enabled")?;
+                state.serialize_value(enabled)?;
             },
             ContactMethod::PushNotificationContactMethod{
                 ref reference, ref address, ref label,
                 ref blacklisted, ref created_at, ref device_type,
                 ref sounds,
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "address")?;
-                serializer.serialize_map_value(&mut state, address)?;
+                state.serialize_key("address")?;
+                state.serialize_value(address)?;
 
-                serializer.serialize_map_key(&mut state, "label")?;
-                serializer.serialize_map_value(&mut state, label)?;
+                state.serialize_key("label")?;
+                state.serialize_value(label)?;
 
-                serializer.serialize_map_key(&mut state, "device_type")?;
-                serializer.serialize_map_value(&mut state, device_type)?;
+                state.serialize_key("device_type")?;
+                state.serialize_value(device_type)?;
 
-                serializer.serialize_map_key(&mut state, "sounds")?;
-                serializer.serialize_map_value(&mut state, sounds)?;
+                state.serialize_key("sounds")?;
+                state.serialize_value(sounds)?;
 
-                serializer.serialize_map_key(&mut state, "blacklisted")?;
-                serializer.serialize_map_value(&mut state, blacklisted)?;
+                state.serialize_key("blacklisted")?;
+                state.serialize_value(blacklisted)?;
 
-                serializer.serialize_map_key(&mut state, "created_at")?;
-                serializer.serialize_map_value(&mut state, created_at)?;
+                state.serialize_key("created_at")?;
+                state.serialize_value(created_at)?;
             },
         }
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
 impl Deserialize for ContactMethod {
-    fn deserialize<D>(deserializer: &mut D) -> Result<ContactMethod, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<ContactMethod, D::Error>
         where D: Deserializer
     {
         let union = ContactMethodUnion::deserialize(deserializer)?;
@@ -339,7 +341,7 @@ impl Deserialize for ContactMethod {
                     sounds: sounds,
                 })
             },
-            _ => Err(D::Error::invalid_value("type received was unexpected.")),
+            _ => Err(D::Error::custom("type received was unexpected.")),
         }
     }
 }

@@ -1,6 +1,8 @@
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
-use serde::Error;
+
+use serde::de::Error;
+use serde::ser::SerializeMap;
 
 use types::reference::Reference;
 
@@ -41,7 +43,7 @@ pub enum Team {
 
 
 impl Serialize for Team {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         let mut state = serializer.serialize_map(None)?;
@@ -50,27 +52,27 @@ impl Serialize for Team {
             Team::TeamReference{
                 ref reference
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
             },
             Team::Team{
                 ref reference, ref name, ref description
             } => {
-                reference.serialize_key_vals(serializer, &mut state)?;
+                reference.serialize_key_vals(&mut state)?;
 
-                serializer.serialize_map_key(&mut state, "name")?;
-                serializer.serialize_map_value(&mut state, name)?;
+                state.serialize_key("name")?;
+                state.serialize_value(name)?;
 
-                serializer.serialize_map_key(&mut state, "description")?;
-                serializer.serialize_map_value(&mut state, description)?;
+                state.serialize_key("description")?;
+                state.serialize_value(description)?;
             },
         }
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
 impl Deserialize for Team {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Team, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Team, D::Error>
         where D: Deserializer
     {
         let union = TeamUnion::deserialize(deserializer)?;
@@ -98,7 +100,7 @@ impl Deserialize for Team {
                     description: union.description,
                 })
             },
-            _ => Err(D::Error::invalid_value("type received was unexpected.")),
+            _ => Err(D::Error::custom("type received was unexpected.")),
         }
     }
 }

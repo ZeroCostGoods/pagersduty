@@ -8,7 +8,7 @@
 //! https://v2.developer.pagerduty.com/v2/docs/references
 
 
-use serde::ser::Serializer;
+use serde::ser::SerializeMap;
 
 
 #[derive(Debug, PartialEq)]
@@ -33,23 +33,23 @@ pub struct Reference {
 
 
 impl Reference {
-    pub fn serialize_key_vals<S>(&self, serializer: &mut S, mut state: &mut S::MapState) -> Result<(), S::Error>
-        where S: Serializer
+    pub fn serialize_key_vals<S>(&self, mut state: &mut S) -> Result<(), S::Error>
+        where S: SerializeMap
     {
-        serializer.serialize_map_key(&mut state, "id")?;
-        serializer.serialize_map_value(&mut state, &self.id)?;
+        state.serialize_key("id")?;
+        state.serialize_value(&self.id)?;
 
-        serializer.serialize_map_key(&mut state, "summary")?;
-        serializer.serialize_map_value(&mut state, &self.summary)?;
+        state.serialize_key("summary")?;
+        state.serialize_value(&self.summary)?;
 
-        serializer.serialize_map_key(&mut state, "type")?;
-        serializer.serialize_map_value(&mut state, &self.type_)?;
+        state.serialize_key("type")?;
+        state.serialize_value(&self.type_)?;
 
-        serializer.serialize_map_key(&mut state, "self")?;
-        serializer.serialize_map_value(&mut state, &self.self_)?;
+        state.serialize_key("self")?;
+        state.serialize_value(&self.self_)?;
 
-        serializer.serialize_map_key(&mut state, "html_url")?;
-        serializer.serialize_map_value(&mut state, &self.html_url)?;
+        state.serialize_key("html_url")?;
+        state.serialize_value(&self.html_url)?;
 
         Ok(())
     }
