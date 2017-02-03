@@ -1,4 +1,5 @@
 use serde::ser::{Serialize, Serializer};
+use serde::ser::SerializeMap;
 use serde_json::value;
 
 static EVENTS_URL: &'static str = "https://events.pagerduty.com/generic/2010-04-15/create_event.json";
@@ -29,44 +30,44 @@ pub enum Context {
 }
 
 impl Serialize for Context {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         let mut state = serializer.serialize_map(None)?;
 
         match *self {
             Context::Link{ ref href, ref text } => {
-                serializer.serialize_map_key(&mut state, "type")?;
-                serializer.serialize_map_value(&mut state, "link")?;
+                state.serialize_key("type")?;
+                state.serialize_value("link")?;
 
-                serializer.serialize_map_key(&mut state, "href")?;
-                serializer.serialize_map_value(&mut state, href)?;
+                state.serialize_key("href")?;
+                state.serialize_value(href)?;
 
                 if let Some(ref text) = *text {
-                    serializer.serialize_map_key(&mut state, "text")?;
-                    serializer.serialize_map_value(&mut state, text)?;
+                    state.serialize_key("text")?;
+                    state.serialize_value(text)?;
                 }
             },
             Context::Image{ ref src, ref href, ref alt } => {
-                serializer.serialize_map_key(&mut state, "type")?;
-                serializer.serialize_map_value(&mut state, "image")?;
+                state.serialize_key("type")?;
+                state.serialize_value("image")?;
 
-                serializer.serialize_map_key(&mut state, "src")?;
-                serializer.serialize_map_value(&mut state, src)?;
+                state.serialize_key("src")?;
+                state.serialize_value(src)?;
 
                 if let Some(ref href) = *href {
-                    serializer.serialize_map_key(&mut state, "href")?;
-                    serializer.serialize_map_value(&mut state, href)?;
+                    state.serialize_key("href")?;
+                    state.serialize_value(href)?;
                 }
 
                 if let Some(ref alt) = *alt {
-                    serializer.serialize_map_key(&mut state, "alt")?;
-                    serializer.serialize_map_value(&mut state, alt)?;
+                    state.serialize_key("alt")?;
+                    state.serialize_value(alt)?;
                 }
             },
         };
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
@@ -224,10 +225,10 @@ mod tests {
     #[test]
     fn test_trigger_event_serialization_2(){
 
-        let mut details = serde_json::Map::new();
-        details.insert("key1".into(), serde_json::Value::String("value1".into()));
-        details.insert("key2".into(), serde_json::Value::F64(3.14));
-        let details = serde_json::Value::Object(details);
+        let details = json!({
+            "key1": "value1",
+            "key2": 3.14,
+        });
 
         let contexts = vec![
             Context::Link {
@@ -240,6 +241,8 @@ mod tests {
                 alt: None,
             },
         ];
+
+
 
         let event = TriggerEvent::new("Some key".into(), "some description".into())
             .details(details)
