@@ -1,37 +1,40 @@
-use serde::de::{Deserialize, Deserializer};
-use serde::ser::{Serialize, Serializer};
-
-use serde::de::Error;
-use serde::ser::SerializeMap;
-
-use types::reference::Reference;
-
-
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-struct TeamUnion {
-    // All Reference's
-    id: String,
-    summary: String,
-    #[serde(rename="type")]
-    type_: String,
-    #[serde(rename="self")]
-    self_: String,
-    html_url: Option<String>,
-
-    // All Concrete type fields
-    name: Option<String>,
-    description: Option<String>,
-}
-
-
-#[derive(Debug, PartialEq)]
+#[serde(tag = "type")]
 pub enum Team {
-    TeamReference {
-        reference: Reference,
+    #[serde(rename="team_reference")]
+    Reference {
+        id: String,
+
+        /// A short-form, server-generated string that provides succinct,
+        /// important information about an object suitable for primary
+        /// labeling of an entity in a client. In many cases, this will be
+        /// identical to `name`, though it is not intended to be an identifier.
+        summary: String,
+
+        /// The API show URL at which the object is accessible.
+        #[serde(rename="self")]
+        self_: String,
+
+        /// A URL at which the entity is uniquely displayed in the Web app.
+        html_url: Option<String>,
     },
 
+    #[serde(rename="team")]
     Team {
-        reference: Reference,
+        id: String,
+
+        /// A short-form, server-generated string that provides succinct,
+        /// important information about an object suitable for primary
+        /// labeling of an entity in a client. In many cases, this will be
+        /// identical to `name`, though it is not intended to be an identifier.
+        summary: String,
+
+        /// The API show URL at which the object is accessible.
+        #[serde(rename="self")]
+        self_: String,
+
+        /// A URL at which the entity is uniquely displayed in the Web app.
+        html_url: Option<String>,
 
         /// The name of the team.
         name: String,
@@ -40,71 +43,6 @@ pub enum Team {
         description: Option<String>,
     },
 }
-
-
-impl Serialize for Team {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        let mut state = serializer.serialize_map(None)?;
-
-        match *self {
-            Team::TeamReference{
-                ref reference
-            } => {
-                reference.serialize_key_vals(&mut state)?;
-            },
-            Team::Team{
-                ref reference, ref name, ref description
-            } => {
-                reference.serialize_key_vals(&mut state)?;
-
-                state.serialize_key("name")?;
-                state.serialize_value(name)?;
-
-                state.serialize_key("description")?;
-                state.serialize_value(description)?;
-            },
-        }
-
-        state.end()
-    }
-}
-
-impl Deserialize for Team {
-    fn deserialize<D>(deserializer: D) -> Result<Team, D::Error>
-        where D: Deserializer
-    {
-        let union = TeamUnion::deserialize(deserializer)?;
-
-        let reference = Reference {
-            id: union.id,
-            summary: union.summary,
-            type_: union.type_,
-            self_: union.self_,
-            html_url: union.html_url,
-        };
-
-        match reference.type_.as_ref() {
-            "team_reference"  => {
-                Ok(Team::TeamReference {
-                    reference: reference,
-                })
-            },
-            "team" => {
-                let name = union.name.ok_or(D::Error::missing_field("name"))?;
-
-                Ok(Team::Team {
-                    reference: reference,
-                    name: name,
-                    description: union.description,
-                })
-            },
-            _ => Err(D::Error::custom("type received was unexpected.")),
-        }
-    }
-}
-
 
 pub type Teams = Vec<Team>;
 
@@ -117,8 +55,6 @@ mod tests {
     use std::fs::File;
     use std::io::Read;
 
-    use types::reference::Reference;
-
     #[test]
     fn test_serde() {
         let mut file = File::open("testdata/types/teams.json").unwrap();
@@ -130,27 +66,21 @@ mod tests {
         assert_eq!(
             teams,
             vec![
-                Team::TeamReference {
-                    reference: Reference {
-                        id: "PRJ4D5C".into(),
-                        summary: "ops".into(),
-                        type_: "team_reference".into(),
-                        self_: "https://api.pagerduty.com/teams/PRJ4D5C".into(),
-                        html_url: Some(
-                            "https://webdemo.pagerduty.com/teams/PRJ4D5C".into()
-                        ),
-                    },
+                Team::Reference {
+                    id: "PRJ4D5C".into(),
+                    summary: "ops".into(),
+                    self_: "https://api.pagerduty.com/teams/PRJ4D5C".into(),
+                    html_url: Some(
+                        "https://webdemo.pagerduty.com/teams/PRJ4D5C".into()
+                    ),
                 },
                 Team::Team {
-                    reference: Reference {
-                        id: "P7W0ZIU".into(),
-                        summary: "Monitoring Tools Team".into(),
-                        type_: "team".into(),
-                        self_: "https://api.pagerduty.com/teams/P7W0ZIU".into(),
-                        html_url: Some(
-                            "https://webdemo.pagerduty.com/teams/P7W0ZIU".into()
-                        ),
-                    },
+                    id: "P7W0ZIU".into(),
+                    summary: "Monitoring Tools Team".into(),
+                    self_: "https://api.pagerduty.com/teams/P7W0ZIU".into(),
+                    html_url: Some(
+                        "https://webdemo.pagerduty.com/teams/P7W0ZIU".into()
+                    ),
                     name: "Monitoring Tools Team".into(),
                     description: None,
                 },

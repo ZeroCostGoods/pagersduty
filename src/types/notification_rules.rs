@@ -1,39 +1,44 @@
-use serde::de::{Deserialize, Deserializer};
-use serde::ser::{Serialize, Serializer};
-
-use serde::de::Error;
-use serde::ser::SerializeMap;
-
-use types::reference::Reference;
 use types::contact_methods::ContactMethod;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-struct NotificationRuleUnion {
-    // All Reference's
-    id: String,
-    summary: String,
-    #[serde(rename="type")]
-    type_: String,
-    #[serde(rename="self")]
-    self_: String,
-    html_url: Option<String>,
-
-    // All Concrete type fields
-    start_delay_in_minutes: Option<u32>,
-    contact_method: Option<ContactMethod>,
-    urgency: Option<String>,
-}
-
-
-#[derive(Debug, PartialEq)]
+#[serde(tag = "type")]
 pub enum NotificationRule {
-    NotificationRuleReference {
-        reference: Reference,
+    #[serde(rename="assignment_notification_rule_reference")]
+    Reference {
+        id: String,
+
+        /// A short-form, server-generated string that provides succinct,
+        /// important information about an object suitable for primary
+        /// labeling of an entity in a client. In many cases, this will be
+        /// identical to `name`, though it is not intended to be an identifier.
+        summary: String,
+
+        /// The API show URL at which the object is accessible.
+        #[serde(rename="self")]
+        self_: String,
+
+        /// A URL at which the entity is uniquely displayed in the Web app.
+        html_url: Option<String>,
     },
 
+    #[serde(rename="assignment_notification_rule")]
     NotificationRule {
-        reference: Reference,
+        id: String,
+
+        /// A short-form, server-generated string that provides succinct,
+        /// important information about an object suitable for primary
+        /// labeling of an entity in a client. In many cases, this will be
+        /// identical to `name`, though it is not intended to be an identifier.
+        summary: String,
+
+        /// The API show URL at which the object is accessible.
+        #[serde(rename="self")]
+        self_: String,
+
+        /// A URL at which the entity is uniquely displayed in the Web app.
+        html_url: Option<String>,
+
 
         /// The delay before firing the rule, in minutes.
         start_delay_in_minutes: u32,
@@ -49,81 +54,6 @@ pub enum NotificationRule {
 }
 
 
-impl Serialize for NotificationRule {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        let mut state = serializer.serialize_map(None)?;
-
-        match *self {
-            NotificationRule::NotificationRuleReference{
-                ref reference
-            } => {
-                reference.serialize_key_vals(&mut state)?;
-            },
-            NotificationRule::NotificationRule{
-                ref reference, ref start_delay_in_minutes,
-                ref contact_method, ref urgency,
-            } => {
-                reference.serialize_key_vals(&mut state)?;
-
-                state.serialize_key("start_delay_in_minutes")?;
-                state.serialize_value(start_delay_in_minutes)?;
-
-                state.serialize_key("contact_method")?;
-                state.serialize_value(contact_method)?;
-
-                state.serialize_key("urgency")?;
-                state.serialize_value(urgency)?;
-            },
-        }
-
-        state.end()
-    }
-}
-
-impl Deserialize for NotificationRule {
-    fn deserialize<D>(deserializer: D) -> Result<NotificationRule, D::Error>
-        where D: Deserializer
-    {
-        let union = NotificationRuleUnion::deserialize(deserializer)?;
-
-        let reference = Reference {
-            id: union.id,
-            summary: union.summary,
-            type_: union.type_,
-            self_: union.self_,
-            html_url: union.html_url,
-        };
-
-        match reference.type_.as_ref() {
-            "assignment_notification_rule_reference"  => {
-                Ok(NotificationRule::NotificationRuleReference {
-                    reference: reference,
-                })
-            },
-            "assignment_notification_rule" => {
-
-                let start_delay_in_minutes = union.start_delay_in_minutes.ok_or(
-                    D::Error::missing_field("start_delay_in_minutes"))?;
-                let contact_method = union.contact_method.ok_or(
-                    D::Error::missing_field("contact_method"))?;
-                let urgency = union.urgency.ok_or(
-                    D::Error::missing_field("urgency"))?;
-
-                Ok(NotificationRule::NotificationRule {
-                    reference: reference,
-                    start_delay_in_minutes: start_delay_in_minutes,
-                    contact_method: contact_method,
-                    urgency: urgency,
-                })
-            },
-            _ => Err(D::Error::custom("type received was unexpected.")),
-        }
-    }
-}
-
-
 pub type NotificationRules = Vec<NotificationRule>;
 
 
@@ -135,7 +65,6 @@ mod tests {
     use std::fs::File;
     use std::io::Read;
 
-    use types::reference::Reference;
     use types::contact_methods::ContactMethod;
 
     #[test]
@@ -149,41 +78,29 @@ mod tests {
         assert_eq!(
             notification_rules,
             vec![
-                NotificationRule::NotificationRuleReference {
-                    reference: Reference {
-                        id: "PM41X3T".into(),
-                        summary: "0 minutes: channel P6YMJEE".into(),
-                        type_: "assignment_notification_rule_reference".into(),
-                        self_: "https://api.pagerduty.com/users/P5T36BU/notification_rules/PM41X3T".into(),
-                        html_url: None,
-                    },
+                NotificationRule::Reference {
+                    id: "PM41X3T".into(),
+                    summary: "0 minutes: channel P6YMJEE".into(),
+                    self_: "https://api.pagerduty.com/users/P5T36BU/notification_rules/PM41X3T".into(),
+                    html_url: None,
                 },
-                NotificationRule::NotificationRuleReference {
-                    reference: Reference {
-                        id: "PNTRY7M".into(),
-                        summary: "0 minutes: channel P6YMJEE".into(),
-                        type_: "assignment_notification_rule_reference".into(),
-                        self_: "https://api.pagerduty.com/users/P5T36BU/notification_rules/PNTRY7M".into(),
-                        html_url: None,
-                    },
+                NotificationRule::Reference {
+                    id: "PNTRY7M".into(),
+                    summary: "0 minutes: channel P6YMJEE".into(),
+                    self_: "https://api.pagerduty.com/users/P5T36BU/notification_rules/PNTRY7M".into(),
+                    html_url: None,
                 },
                 NotificationRule::NotificationRule {
-                    reference: Reference {
-                        id: "PW0WSB8".into(),
-                        summary: "0 minutes: channel PX11CYC".into(),
-                        type_: "assignment_notification_rule".into(),
-                        self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PW0WSB8".into(),
-                        html_url: None,
-                    },
+                    id: "PW0WSB8".into(),
+                    summary: "0 minutes: channel PX11CYC".into(),
+                    self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PW0WSB8".into(),
+                    html_url: None,
                     start_delay_in_minutes: 0,
-                    contact_method: ContactMethod::EmailContactMethod {
-                        reference: Reference {
-                            id: "PX11CYC".into(),
-                            summary: "Default".into(),
-                            type_: "email_contact_method".into(),
-                            self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC".into(),
-                            html_url: None,
-                        },
+                    contact_method: ContactMethod::Email {
+                        id: "PX11CYC".into(),
+                        summary: "Default".into(),
+                        self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC".into(),
+                        html_url: None,
                         address: "acunningham@pagerduty.com".into(),
                         label: "Default".into(),
                         send_short_email: false,
@@ -192,22 +109,16 @@ mod tests {
                     urgency: "high".into(),
                 },
                 NotificationRule::NotificationRule {
-                    reference: Reference {
-                        id: "PGITUFO".into(),
-                        summary: "0 minutes: channel PX11CYC".into(),
-                        type_: "assignment_notification_rule".into(),
-                        self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PGITUFO".into(),
-                        html_url: None,
-                    },
+                    id: "PGITUFO".into(),
+                    summary: "0 minutes: channel PX11CYC".into(),
+                    self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PGITUFO".into(),
+                    html_url: None,
                     start_delay_in_minutes: 0,
-                    contact_method: ContactMethod::EmailContactMethod {
-                        reference: Reference {
-                            id: "PX11CYC".into(),
-                            summary: "Default".into(),
-                            type_: "email_contact_method".into(),
-                            self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC".into(),
-                            html_url: None,
-                        },
+                    contact_method: ContactMethod::Email {
+                        id: "PX11CYC".into(),
+                        summary: "Default".into(),
+                        self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PX11CYC".into(),
+                        html_url: None,
                         address: "acunningham@pagerduty.com".into(),
                         label: "Default".into(),
                         send_short_email: false,
@@ -216,22 +127,16 @@ mod tests {
                     urgency: "low".into(),
                 },
                 NotificationRule::NotificationRule {
-                    reference: Reference {
-                        id: "PEY06R9".into(),
-                        summary: "0 minutes: channel PEC83HY".into(),
-                        type_: "assignment_notification_rule".into(),
-                        self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PEY06R9".into(),
-                        html_url: None,
-                    },
+                    id: "PEY06R9".into(),
+                    summary: "0 minutes: channel PEC83HY".into(),
+                    self_: "https://api.pagerduty.com/users/PGJ36Z3/notification_rules/PEY06R9".into(),
+                    html_url: None,
                     start_delay_in_minutes: 0,
-                    contact_method: ContactMethod::SmsContactMethod {
-                        reference: Reference {
-                            id: "PEC83HY".into(),
-                            summary: "Mobile".into(),
-                            type_: "sms_contact_method".into(),
-                            self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PEC83HY".into(),
-                            html_url: None,
-                        },
+                    contact_method: ContactMethod::Sms {
+                        id: "PEC83HY".into(),
+                        summary: "Mobile".into(),
+                        self_: "https://api.pagerduty.com/users/PGJ36Z3/contact_methods/PEC83HY".into(),
+                        html_url: None,
                         address: "4155809923".into(),
                         label: "Mobile".into(),
                         blacklisted: false,
