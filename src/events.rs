@@ -1,73 +1,67 @@
-use serde::ser::{Serialize, Serializer};
-use serde::ser::SerializeMap;
-use serde_json::value;
+use std::io::Read;
+
+use hyper::Client;
+use hyper::net::HttpsConnector;
+use hyper_native_tls::NativeTlsClient;
+use serde::ser::Serialize;
+
+use serde_json;
 
 static EVENTS_URL: &'static str = "https://events.pagerduty.com/generic/2010-04-15/create_event.json";
 
-#[derive(Debug, PartialEq)]
+fn get_https_client() -> Client {
+    let ssl = NativeTlsClient::new().unwrap();
+    let connector = HttpsConnector::new(ssl);
+    Client::with_connector(connector)
+}
+
+
+pub fn send<T: Serialize>(event: T) {
+    let client = get_https_client();
+    let body = serde_json::to_string(&event).unwrap();
+    let mut output = String::new();
+
+    let mut response = client
+        .post(EVENTS_URL)
+        .body(&body)
+        .send()
+        .unwrap();
+
+    response.read_to_string(&mut output).unwrap();
+
+    println!("{:#?}", response);
+    println!("{:#?}", output);
+}
+
+
+#[derive(Serialize, Debug, PartialEq)]
+#[serde(tag = "type")]
 pub enum Context {
 
     /// The link type is used to attach hyperlinks to an incident.
+    #[serde(rename="link")]
     Link {
         /// The link being attached to the incident.
         href: String,
 
         /// Plain text that describes the purpose of the link, and can be used as the link's text.
+        #[serde(skip_serializing_if = "Option::is_none")]
         text: Option<String>,
     },
 
     /// The image type is used to attach images to an incident. Images must be served via HTTPS.
+    #[serde(rename="image")]
     Image {
         /// The source of the image being attached to the incident. This image must be served via HTTPS.
         src: String,
 
         /// Optional link for the image.
+        #[serde(skip_serializing_if = "Option::is_none")]
         href: Option<String>,
 
         /// Optional alternative text for the image.
+        #[serde(skip_serializing_if = "Option::is_none")]
         alt: Option<String>,
-    }
-}
-
-impl Serialize for Context {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        let mut state = serializer.serialize_map(None)?;
-
-        match *self {
-            Context::Link{ ref href, ref text } => {
-                state.serialize_key("type")?;
-                state.serialize_value("link")?;
-
-                state.serialize_key("href")?;
-                state.serialize_value(href)?;
-
-                if let Some(ref text) = *text {
-                    state.serialize_key("text")?;
-                    state.serialize_value(text)?;
-                }
-            },
-            Context::Image{ ref src, ref href, ref alt } => {
-                state.serialize_key("type")?;
-                state.serialize_value("image")?;
-
-                state.serialize_key("src")?;
-                state.serialize_value(src)?;
-
-                if let Some(ref href) = *href {
-                    state.serialize_key("href")?;
-                    state.serialize_value(href)?;
-                }
-
-                if let Some(ref alt) = *alt {
-                    state.serialize_key("alt")?;
-                    state.serialize_value(alt)?;
-                }
-            },
-        };
-
-        state.end()
     }
 }
 
@@ -91,7 +85,7 @@ pub struct TriggerEvent {
 
     /// An arbitrary JSON object containing any data you'd like included in the incident log.
     #[serde(skip_serializing_if = "Option::is_none")]
-    details: Option<value::Value>,
+    details: Option<serde_json::value::Value>,
 
     /// The name of the monitoring client that is triggering this event.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -125,7 +119,7 @@ impl TriggerEvent {
         self
     }
 
-    pub fn details(mut self, details: value::Value) -> TriggerEvent {
+    pub fn details(mut self, details: serde_json::value::Value) -> TriggerEvent {
         self.details = Some(details);
         self
     }
@@ -144,33 +138,21 @@ impl TriggerEvent {
         self.contexts = Some(contexts);
         self
     }
+
+    pub fn send(self) {
+        send(self)
+    }
 }
 
+/// Acknowledge events cause the referenced incident to enter the acknowledged state.
+///
+/// While an incident is acknowledged, it won't generate any additional
+/// notifications, even if it receives new trigger events.
+///
+/// Your monitoring tools should send PagerDuty an acknowledge event when they know
+/// someone is presently working on the problem.
 #[derive(Serialize, Debug, PartialEq)]
-pub enum HandleEventType {
-
-    /// Acknowledge events cause the referenced incident to enter the acknowledged state.
-    ///
-    /// While an incident is acknowledged, it won't generate any additional
-    /// notifications, even if it receives new trigger events.
-    ///
-    /// Your monitoring tools should send PagerDuty an acknowledge event when they know
-    /// someone is presently working on the problem.
-    Acknowledge,
-
-    /// Resolve events cause the referenced incident to enter the resolved state.
-    ///
-    /// Once an incident is resolved, it won't generate any additional notifications.
-    /// New trigger events with the same incident_key as a resolved incident won't
-    /// re-open the incident. Instead, a new incident will be created.
-    ///
-    /// Your monitoring tools should send PagerDuty a resolve event when the problem
-    /// that caused the initial trigger event has been fixed.
-    Resolve,
-}
-
-#[derive(Serialize, Debug, PartialEq)]
-pub struct HandleEvent {
+pub struct AcknowledgeEvent {
 
     /// The GUID of one of your "Generic API" services. This is the
     /// "Integration Key" listed on a Generic API's service detail page.
@@ -183,18 +165,53 @@ pub struct HandleEvent {
     incident_key: String,
 }
 
-impl HandleEvent {
-    pub fn new(service_key: String, event_type: HandleEventType, incident_key: String) -> HandleEvent {
-        let event_type = match event_type {
-            HandleEventType::Acknowledge => "acknowledge".into(),
-            HandleEventType::Resolve => "resolve".into(),
-        };
-
-        HandleEvent {
+impl AcknowledgeEvent {
+    pub fn new(service_key: String, incident_key: String) -> AcknowledgeEvent {
+        AcknowledgeEvent {
             service_key: service_key,
-            event_type: event_type,
+            event_type: "acknowledge".into(),
             incident_key: incident_key,
         }
+    }
+
+    pub fn send(self) {
+        send(self)
+    }
+}
+
+/// Resolve events cause the referenced incident to enter the resolved state.
+///
+/// Once an incident is resolved, it won't generate any additional notifications.
+/// New trigger events with the same incident_key as a resolved incident won't
+/// re-open the incident. Instead, a new incident will be created.
+///
+/// Your monitoring tools should send PagerDuty a resolve event when the problem
+/// that caused the initial trigger event has been fixed.
+#[derive(Serialize, Debug, PartialEq)]
+pub struct ResolveEvent {
+
+    /// The GUID of one of your "Generic API" services. This is the
+    /// "Integration Key" listed on a Generic API's service detail page.
+    service_key: String,
+
+    /// The type of event. Can be trigger, acknowledge or resolve.
+    event_type: String,
+
+    /// Identifies the incident to acknowledge or resolve.
+    incident_key: String,
+}
+
+impl ResolveEvent {
+    pub fn new(service_key: String, incident_key: String) -> ResolveEvent {
+        ResolveEvent {
+            service_key: service_key,
+            event_type: "resolve".into(),
+            incident_key: incident_key,
+        }
+    }
+
+    pub fn send(self) {
+        send(self)
     }
 }
 
@@ -266,9 +283,9 @@ mod tests {
     }
 
     #[test]
-    fn test_handle_event_serialization_1(){
-        let event = HandleEvent::new(
-            "Some key".into(), HandleEventType::Acknowledge, "ASF123S".into()
+    fn test_acknowledge_event_serialization(){
+        let event = AcknowledgeEvent::new(
+            "Some key".into(), "ASF123S".into()
         );
         let json: serde_json::Value = serde_json::from_str(
             serde_json::to_string(&event).unwrap().as_ref()
@@ -283,9 +300,9 @@ mod tests {
     }
 
     #[test]
-    fn test_handle_event_serialization_2(){
-        let event = HandleEvent::new(
-            "Some key".into(), HandleEventType::Resolve, "ASF123S".into()
+    fn test_resolve_event_serialization(){
+        let event = ResolveEvent::new(
+            "Some key".into(), "ASF123S".into()
         );
         let json: serde_json::Value = serde_json::from_str(
             serde_json::to_string(&event).unwrap().as_ref()
