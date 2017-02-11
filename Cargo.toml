@@ -9,7 +9,7 @@ description = "Rust Client Library for the PagerDuty v2 API"
 
 [dependencies]
 hyper = "0.10"
-hyper-native-tls = "0.2.2"
+hyper-native-tls = "0.2.4"
 serde = "0.9.6"
 serde_derive = "0.9.6"
 serde_json = "0.9"

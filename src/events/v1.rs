@@ -1,38 +1,90 @@
 use std::io::Read;
+use std::error::Error;
 
 use hyper::Client;
+use hyper::status::StatusCode;
 use hyper::net::HttpsConnector;
-use hyper_native_tls::NativeTlsClient;
+use hyper_native_tls::{self, NativeTlsClient};
 use serde::ser::Serialize;
 
 use serde_json;
 
 static EVENTS_URL: &'static str = "https://events.pagerduty.com/generic/2010-04-15/create_event.json";
 
-fn get_https_client() -> Client {
-    let ssl = NativeTlsClient::new().unwrap();
+
+fn get_https_client() -> Result<Client, hyper_native_tls::native_tls::Error> {
+    let ssl = NativeTlsClient::new()?;
     let connector = HttpsConnector::new(ssl);
-    Client::with_connector(connector)
+    Ok(Client::with_connector(connector))
 }
 
 
-pub fn send<T: Serialize>(event: T) {
-    let client = get_https_client();
-    let body = serde_json::to_string(&event).unwrap();
+pub fn send<T: Serialize>(event: T) -> Result<EventProcessed, ErrorResponse> {
+    let client = get_https_client().map_err(ErrorResponse::unexpected)?;
+    let body = serde_json::to_string(&event).map_err(ErrorResponse::unexpected)?;
     let mut output = String::new();
 
     let mut response = client
         .post(EVENTS_URL)
         .body(&body)
         .send()
-        .unwrap();
+        .map_err(ErrorResponse::unexpected)?;
 
-    response.read_to_string(&mut output).unwrap();
+    if response.status == StatusCode::Forbidden {
+        return Err(ErrorResponse::RateLimited);
+    }
 
-    println!("{:#?}", response);
-    println!("{:#?}", output);
+    response.read_to_string(&mut output).map_err(ErrorResponse::unexpected)?;
+    println!("Response: {:#?}", response);
+    println!("Output: {:#?}", output);
+
+    match response.status {
+        StatusCode::Ok => {
+            Ok(serde_json::from_str(&output).map_err(ErrorResponse::unexpected)?)
+        },
+        StatusCode::BadRequest => {
+            Err(serde_json::from_str(&output).map_err(ErrorResponse::unexpected)?)
+        },
+        _ => Err(ErrorResponse::Unexpected(output)),
+    }
 }
 
+
+#[derive(Deserialize, Debug, PartialEq)]
+#[serde(untagged)]
+pub enum ErrorResponse {
+
+    /// If the event is improperly formatted this will be returned.
+    InvalidEvent {
+        status: String,
+        message: String,
+        errors: Vec<String>,
+    },
+
+    /// There is a limit on the number of events that a service can accept at
+    /// any given time. If the service has received too many events this error
+    /// will be returned. If it is vital that all events your monitoring tool
+    /// sends be received, be sure to retry (preferably with a back off).
+    RateLimited,
+
+    /// This return is used for all other errors that this library didn't
+    /// account for.
+    Unexpected(String),
+
+}
+
+impl ErrorResponse {
+    fn unexpected<T: Error>(err: T) -> ErrorResponse {
+        ErrorResponse::Unexpected(err.description().into())
+    }
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub struct EventProcessed {
+    pub status: String,
+    pub message: String,
+    pub incident_key: String
+}
 
 #[derive(Serialize, Debug, PartialEq)]
 #[serde(tag = "type")]
@@ -139,7 +191,7 @@ impl TriggerEvent {
         self
     }
 
-    pub fn send(self) {
+    pub fn send(self) -> Result<EventProcessed, ErrorResponse> {
         send(self)
     }
 }
@@ -174,7 +226,7 @@ impl AcknowledgeEvent {
         }
     }
 
-    pub fn send(self) {
+    pub fn send(self) -> Result<EventProcessed, ErrorResponse> {
         send(self)
     }
 }
@@ -210,7 +262,7 @@ impl ResolveEvent {
         }
     }
 
-    pub fn send(self) {
+    pub fn send(self) -> Result<EventProcessed, ErrorResponse> {
         send(self)
     }
 }

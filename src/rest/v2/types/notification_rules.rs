@@ -1,4 +1,4 @@
-use types::contact_methods::ContactMethod;
+use ::rest::v2::types::contact_methods::ContactMethod;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -65,7 +65,7 @@ mod tests {
     use std::fs::File;
     use std::io::Read;
 
-    use types::contact_methods::ContactMethod;
+    use ::rest::v2::types::contact_methods::ContactMethod;
 
     #[test]
     fn test_serde() {
