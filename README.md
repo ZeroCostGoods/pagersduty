@@ -9,13 +9,13 @@ Unofficial Rust Client Library for the PagerDuty v2 API
 
 ## Usage
 
-The pygersduty library requires at least Rust 1.15.
+The pygersduty library requires at least Rust 1.18.
 
 Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pagersduty = "0.1.0"
+pagersduty = "0.2.0"
 ```
 
 and this to your crate root:

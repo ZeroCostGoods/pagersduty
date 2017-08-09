@@ -1,6 +1,6 @@
-use types::contact_methods::ContactMethods;
-use types::notification_rules::NotificationRules;
-use types::teams::Teams;
+use ::rest::v2::types::contact_methods::ContactMethods;
+use ::rest::v2::types::notification_rules::NotificationRules;
+use ::rest::v2::types::teams::Teams;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -99,8 +99,8 @@ mod tests {
     use std::fs::File;
     use std::io::Read;
 
-    use ::types::contact_methods::ContactMethod;
-    use ::types::notification_rules::NotificationRule;
+    use ::rest::v2::types::contact_methods::ContactMethod;
+    use ::rest::v2::types::notification_rules::NotificationRule;
 
     #[test]
     fn test_serde() {
