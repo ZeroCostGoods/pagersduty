@@ -1,41 +1,31 @@
 use std::io::Read;
 use std::error::Error;
 
-use hyper::Client;
-use hyper::status::StatusCode;
-use hyper::net::HttpsConnector;
-use hyper_native_tls::{self, NativeTlsClient};
+use reqwest::{Client, StatusCode};
 use serde::ser::Serialize;
-
 use serde_json;
 
 static EVENTS_URL: &'static str = "https://events.pagerduty.com/generic/2010-04-15/create_event.json";
 
 
-fn get_https_client() -> Result<Client, hyper_native_tls::native_tls::Error> {
-    let ssl = NativeTlsClient::new()?;
-    let connector = HttpsConnector::new(ssl);
-    Ok(Client::with_connector(connector))
-}
-
-
 pub fn send<T: Serialize>(event: T) -> Result<EventProcessed, ErrorResponse> {
-    let client = get_https_client().map_err(ErrorResponse::unexpected)?;
-    let body = serde_json::to_string(&event).map_err(ErrorResponse::unexpected)?;
-    let mut output = String::new();
+    let client = Client::new().map_err(ErrorResponse::unexpected)?;
 
     let mut response = client
-        .post(EVENTS_URL)
-        .body(&body)
-        .send()
-        .map_err(ErrorResponse::unexpected)?;
+        .post(EVENTS_URL).map_err(ErrorResponse::unexpected)?
+        .json(&event).map_err(ErrorResponse::unexpected)?
+        .send().map_err(ErrorResponse::unexpected)?;
 
-    if response.status == StatusCode::Forbidden {
+    let status = response.status();
+
+    if status == StatusCode::Forbidden {
         return Err(ErrorResponse::RateLimited);
     }
 
+    let mut output = String::new();
     response.read_to_string(&mut output).map_err(ErrorResponse::unexpected)?;
-    match response.status {
+
+    match status {
         StatusCode::Ok => {
             Ok(serde_json::from_str(&output).map_err(ErrorResponse::unexpected)?)
         },

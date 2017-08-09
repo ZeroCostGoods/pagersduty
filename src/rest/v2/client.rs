@@ -1,16 +1,16 @@
-use hyper;
-use hyper::client::response::{Response};
-use hyper::header::{Headers, Accept, Authorization, qitem};
-use hyper::mime::{Mime};
+use reqwest::{self, Response};
+use reqwest::header::{Headers, Accept, Authorization, qitem};
+use reqwest::mime::{Mime};
 
 static PD_API_URL: &'static str = "https://api.pagerduty.com";
 
 static PD_API_MIME_TYPE: &'static str = "application/vnd.pagerduty+json;version=2";
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Client {
-    auth_token: String
+    auth_token: String,
+    http_client: reqwest::Client,
 }
 
 
@@ -18,6 +18,7 @@ impl Client {
     pub fn new<T: Into<String>>(auth_token: T) -> Client {
         Client {
             auth_token: auth_token.into(),
+            http_client: reqwest::Client::new().unwrap(),
         }
     }
 
@@ -39,12 +40,9 @@ impl Client {
     }
 
     pub fn get(&self, path: &str) -> Response {
-
-        let http_client = hyper::Client::new();
-
         let url = format!("{}/{}", PD_API_URL, path);
-
-        http_client.get(&url)
+        self.http_client
+            .get(&url).unwrap()
             .headers(self.get_headers())
             .send()
             .unwrap()
