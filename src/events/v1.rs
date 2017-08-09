@@ -35,9 +35,6 @@ pub fn send<T: Serialize>(event: T) -> Result<EventProcessed, ErrorResponse> {
     }
 
     response.read_to_string(&mut output).map_err(ErrorResponse::unexpected)?;
-    println!("Response: {:#?}", response);
-    println!("Output: {:#?}", output);
-
     match response.status {
         StatusCode::Ok => {
             Ok(serde_json::from_str(&output).map_err(ErrorResponse::unexpected)?)
