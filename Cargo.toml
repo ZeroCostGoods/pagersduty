@@ -1,6 +1,6 @@
 [package]
 name = "pagersduty"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Gary M. Josack <gary@byoteki.com>"]
 repository = "https://github.com/ZeroCostGoods/pagersduty"
 documentation = "https://docs.rs/pagersduty"
