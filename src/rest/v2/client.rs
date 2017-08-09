@@ -58,18 +58,14 @@ mod tests {
     fn test_client() {
         // Test instantiation with &str
         assert_eq!(
-            Client::new("Hello, World!"),
-            Client {
-                auth_token: "Hello, World!".into(),
-            }
+            Client::new("Hello, World!").auth_token,
+            String::from("Hello, World!")
         );
 
         // Test instantiation with String
         assert_eq!(
-            Client::new(String::from("Hello, World!")),
-            Client {
-                auth_token: "Hello, World!".into(),
-            }
+            Client::new(String::from("Hello, World!")).auth_token,
+            String::from("Hello, World!")
         );
     }
 }
